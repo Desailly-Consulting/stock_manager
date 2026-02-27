@@ -7,8 +7,11 @@ from .routers import products, movements
 from . import crud, schemas
 from .database import SessionLocal
 
-# Créer les tables au démarrage si elles n'existent pas
-Base.metadata.create_all(bind=engine)
+# Créer les tables si elles n'existent pas (non bloquant si la DB est injoignable)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"[WARNING] Impossible de créer les tables au démarrage : {e}")
 
 app = FastAPI(
     title="Stock Manager API",

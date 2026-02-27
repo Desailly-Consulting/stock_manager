@@ -1,9 +1,13 @@
+import re
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from .config import settings
 
+# psycopg2 ne comprend pas ?pgbouncer=true (paramètre Supabase) — on le retire
+_db_url = re.sub(r"[?&]pgbouncer=true", "", settings.database_url)
+
 engine = create_engine(
-    settings.database_url,
+    _db_url,
     pool_pre_ping=True,   # vérifie la connexion avant chaque utilisation
     pool_size=5,
     max_overflow=10,
