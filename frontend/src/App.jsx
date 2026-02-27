@@ -7,6 +7,7 @@ import Products  from './pages/Products'
 import Movements from './pages/Movements'
 import History   from './pages/History'
 import Alerts    from './pages/Alerts'
+import DevTools  from './pages/DevTools'
 
 export default function App() {
   const [products,  setProducts]  = useState(initialProducts)
@@ -48,6 +49,7 @@ export default function App() {
           path="/alerts"
           element={<Alerts {...sharedProps} />}
         />
+        <Route path="/dev" element={<DevTools />} />
       </Routes>
     </BrowserRouter>
   )

@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import {
   LayoutDashboard,
   Package,
@@ -6,6 +6,7 @@ import {
   History,
   BellRing,
   ChevronRight,
+  BookOpen,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -63,9 +64,15 @@ export default function Sidebar({ alertCount = 0, onNavClick }) {
       </nav>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-primary-700">
-        <p className="text-primary-400 text-xs">Version 1.0 — Démo</p>
-        <p className="text-primary-500 text-xs mt-0.5">Données simulées</p>
+      <div className="px-4 py-4 border-t border-primary-700 space-y-2">
+        <Link
+          to="/dev"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-primary-300 hover:bg-primary-800 hover:text-white text-xs font-medium transition-colors"
+        >
+          <BookOpen size={14} />
+          Documentation API
+        </Link>
+        <p className="text-primary-500 text-xs px-3">Version 1.0 — Démo</p>
       </div>
     </aside>
   )
