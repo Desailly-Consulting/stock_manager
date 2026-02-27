@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ArrowUpRight, ArrowDownRight, Plus } from 'lucide-react'
 import Layout from '../components/Layout'
-import { getNextMovementId } from '../data/mockData'
+import { api } from '../services/api'
 
 const today = () => new Date().toISOString().split('T')[0]
 
@@ -24,35 +24,32 @@ export default function Movements({ products, movements, setMovements, setProduc
     return e
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
 
-    const product = products.find(p => p.id === Number(form.productId))
-    const qty     = Number(form.quantity)
-    const newMov  = {
-      id:          getNextMovementId(),
-      productId:   Number(form.productId),
-      productName: product?.name ?? '',
-      type:        form.type,
-      quantity:    qty,
-      date:        form.date,
-      comment:     form.comment.trim(),
+    try {
+      const newMov = await api.createMovement({
+        productId: Number(form.productId),
+        type:      form.type,
+        quantity:  Number(form.quantity),
+        date:      form.date,
+        comment:   form.comment.trim(),
+      })
+      setMovements(prev => [newMov, ...prev])
+
+      // Rechargement des produits pour refléter la mise à jour du stock côté serveur
+      const updatedProducts = await api.getProducts()
+      setProducts(updatedProducts)
+
+      setErrors({})
+      setSuccess(true)
+      setForm(f => ({ ...f, quantity: '', comment: '', date: today() }))
+      setTimeout(() => setSuccess(false), 3000)
+    } catch (err) {
+      console.error('Erreur lors de l\'enregistrement :', err)
     }
-
-    setMovements(prev => [newMov, ...prev])
-    // Update product quantity
-    setProducts(prev => prev.map(p => {
-      if (p.id !== Number(form.productId)) return p
-      const delta = form.type === 'Entrée' ? qty : -qty
-      return { ...p, quantity: Math.max(0, p.quantity + delta) }
-    }))
-
-    setErrors({})
-    setSuccess(true)
-    setForm(f => ({ ...f, quantity: '', comment: '', date: today() }))
-    setTimeout(() => setSuccess(false), 3000)
   }
 
   const recent = movements.slice(0, 10)

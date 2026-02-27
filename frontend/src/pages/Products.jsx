@@ -3,7 +3,8 @@ import { Plus, Search, Pencil, Trash2, Filter } from 'lucide-react'
 import Layout from '../components/Layout'
 import AlertBadge from '../components/AlertBadge'
 import ProductModal from '../components/ProductModal'
-import { CATEGORIES, getNextProductId } from '../data/mockData'
+import { CATEGORIES } from '../data/mockData'
+import { api } from '../services/api'
 
 function getStatus(p) {
   if (p.quantity <= 0) return 'Rupture'
@@ -24,18 +25,29 @@ export default function Products({ products, setProducts, alertCount }) {
     })
   }, [products, search, categoryFilter])
 
-  const handleSave = (data) => {
-    if (data.id) {
-      setProducts(prev => prev.map(p => p.id === data.id ? data : p))
-    } else {
-      setProducts(prev => [...prev, { ...data, id: getNextProductId() }])
+  const handleSave = async (data) => {
+    try {
+      if (data.id) {
+        const updated = await api.updateProduct(data.id, data)
+        setProducts(prev => prev.map(p => p.id === updated.id ? updated : p))
+      } else {
+        const created = await api.createProduct(data)
+        setProducts(prev => [...prev, created])
+      }
+      setModal(null)
+    } catch (err) {
+      console.error('Erreur lors de la sauvegarde :', err)
     }
-    setModal(null)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Supprimer ce produit ?')) {
-      setProducts(prev => prev.filter(p => p.id !== id))
+      try {
+        await api.deleteProduct(id)
+        setProducts(prev => prev.filter(p => p.id !== id))
+      } catch (err) {
+        console.error('Erreur lors de la suppression :', err)
+      }
     }
   }
 
